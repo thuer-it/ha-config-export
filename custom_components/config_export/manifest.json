@@ -1,0 +1,20 @@
+{
+  "domain": "config_export",
+  "name": "Config Export",
+  "codeowners": [
+    "@thuer-it"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "automation",
+    "script",
+    "lovelace"
+  ],
+  "documentation": "https://github.com/thuer-it/ha-config-export",
+  "integration_type": "service",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/thuer-it/ha-config-export/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "0.1.0"
+}

@@ -1,0 +1,45 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Config Export",
+        "description": "Provides the service config_export.markdown (admin only)."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Already configured."
+    }
+  },
+  "services": {
+    "markdown": {
+      "name": "Configuration as Markdown",
+      "description": "Returns the Home Assistant configuration as Markdown (secrets redacted).",
+      "fields": {
+        "sections": {
+          "name": "Sections",
+          "description": "Sections to include (empty = all)."
+        },
+        "filter_area": {
+          "name": "Area",
+          "description": "Only devices/entities in this area."
+        },
+        "filter_domain": {
+          "name": "Domain",
+          "description": "Only entities of this domain, e.g. light."
+        },
+        "filter_integration": {
+          "name": "Integration",
+          "description": "Only devices/entities of this integration, e.g. zha."
+        },
+        "include_states": {
+          "name": "States",
+          "description": "Include current states."
+        },
+        "detail": {
+          "name": "Detail",
+          "description": "summary or full (complete automation/script/helper/dashboard config)."
+        }
+      }
+    }
+  }
+}

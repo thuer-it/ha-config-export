@@ -1,0 +1,47 @@
+markdown:
+  fields:
+    sections:
+      required: false
+      example: ["areas", "automations"]
+      selector:
+        select:
+          multiple: true
+          options:
+            - overview
+            - floors
+            - areas
+            - labels
+            - integrations
+            - devices
+            - entities
+            - automations
+            - scripts
+            - helpers
+            - dashboards
+    filter_area:
+      required: false
+      selector:
+        area:
+    filter_domain:
+      required: false
+      example: "light"
+      selector:
+        text:
+    filter_integration:
+      required: false
+      example: "zha"
+      selector:
+        text:
+    include_states:
+      required: false
+      default: false
+      selector:
+        boolean:
+    detail:
+      required: false
+      default: summary
+      selector:
+        select:
+          options:
+            - summary
+            - full
