@@ -117,3 +117,29 @@ def test_device_entry_ids_new_and_old_style() -> None:
     assert device_entry_ids(NewDev("e1")) == {"e1"}
     assert device_entry_ids(NewDev(None)) == set()
     assert device_entry_ids(OldDev({"a", "b"})) == {"a", "b"}
+
+
+def test_iter_devices_old_and_new_style() -> None:
+    from custom_components.config_export.markdown import iter_devices
+
+    class OldReg:
+        devices = {"id1": "dev1"}
+
+    class View:
+        def __init__(self, items):
+            self._i = items
+
+        def __iter__(self):
+            return iter(self._i)
+
+        def __len__(self):
+            return len(self._i)
+
+        def __getattr__(self, name):
+            raise AssertionError("deprecated mapping use")
+
+    class NewReg:
+        devices = View(["dev1"])
+
+    assert iter_devices(OldReg()) == ["dev1"]
+    assert iter_devices(NewReg()) == ["dev1"]

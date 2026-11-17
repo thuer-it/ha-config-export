@@ -79,6 +79,19 @@ def device_entry_ids(dev: Any) -> set[str]:
     return set(getattr(dev, "config_entries", ()) or ())
 
 
+def iter_devices(dreg: dr.DeviceRegistry) -> list[dr.DeviceEntry]:
+    """All device entries.
+
+    HA >= 2026.11: ``DeviceRegistry.devices`` is a view whose iteration yields
+    the entries; mapping use (``.values()``) is deprecated. Older versions
+    expose a dict-like container (iteration yields ids).
+    """
+    devices = dreg.devices
+    if hasattr(type(devices), "values"):
+        return list(devices.values())
+    return list(devices)
+
+
 def _read_storage(path: Path) -> Any:
     if not path.is_file():
         return None
@@ -149,7 +162,7 @@ async def async_build_markdown(hass: HomeAssistant, opts: dict[str, Any]) -> dic
             ["Bereiche", len(area_name)],
             ["Labels", len(label_name)],
             ["Integrationen (Einträge)", len(entry_domain)],
-            ["Geräte", len(dreg.devices)],
+            ["Geräte", len(iter_devices(dreg))],
             ["Entitäten (Registry)", len(ereg.entities)],
             ["Zustände", len(hass.states.async_all())],
         ]))
@@ -188,7 +201,7 @@ async def async_build_markdown(hass: HomeAssistant, opts: dict[str, Any]) -> dic
     if "integrations" in sections:
         dev_cnt: dict[str, int] = defaultdict(int)
         ent_cnt: dict[str, int] = defaultdict(int)
-        for d in dreg.devices.values():
+        for d in iter_devices(dreg):
             for c in device_entry_ids(d):
                 dev_cnt[c] += 1
         for e in ereg.entities.values():
@@ -205,7 +218,7 @@ async def async_build_markdown(hass: HomeAssistant, opts: dict[str, Any]) -> dic
     if "devices" in sections:
         md.append("\n## Geräte\n")
         grouped: dict[str, list] = defaultdict(list)
-        for d in dreg.devices.values():
+        for d in iter_devices(dreg):
             if not dev_ok(d):
                 continue
             grouped[area_name.get(d.area_id, NO_AREA)].append([
