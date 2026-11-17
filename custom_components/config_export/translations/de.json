@@ -15,12 +15,34 @@
       "name": "Konfiguration als Markdown",
       "description": "Gibt die Home-Assistant-Konfiguration als Markdown zurück (ohne Geheimnisse).",
       "fields": {
-        "sections": {"name": "Abschnitte", "description": "Welche Abschnitte (leer = alle)."},
-        "filter_area": {"name": "Bereich", "description": "Nur Geräte/Entitäten dieses Bereichs."},
-        "filter_domain": {"name": "Domain", "description": "Nur Entitäten dieser Domain, z. B. light."},
-        "filter_integration": {"name": "Integration", "description": "Nur Geräte/Entitäten dieser Integration, z. B. zha."},
-        "include_states": {"name": "Zustände", "description": "Aktuelle Zustände mit ausgeben."},
-        "detail": {"name": "Detailgrad", "description": "summary oder full (volle Automations-/Skript-/Dashboard-Konfiguration)."}
+        "sections": {
+          "name": "Abschnitte",
+          "description": "Welche Abschnitte (leer = alle außer devices/entities)."
+        },
+        "filter_area": {
+          "name": "Bereich",
+          "description": "Nur Geräte/Entitäten dieses Bereichs."
+        },
+        "filter_domain": {
+          "name": "Domain",
+          "description": "Nur Entitäten dieser Domain, z. B. light."
+        },
+        "filter_integration": {
+          "name": "Integration",
+          "description": "Nur Geräte/Entitäten dieser Integration, z. B. zha."
+        },
+        "include_states": {
+          "name": "Zustände",
+          "description": "Aktuelle Zustände mit ausgeben."
+        },
+        "detail": {
+          "name": "Detailgrad",
+          "description": "summary oder full (volle Automations-/Skript-/Dashboard-Konfiguration)."
+        },
+        "include_disabled": {
+          "name": "Deaktivierte",
+          "description": "Deaktivierte Geräte/Entitäten mit ausgeben."
+        }
       }
     }
   }

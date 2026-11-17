@@ -8,6 +8,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+import attr
+
 from homeassistant.const import __version__ as HA_VERSION
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import (
@@ -20,7 +22,7 @@ from homeassistant.helpers import (
 from homeassistant.util import dt as dt_util
 from homeassistant.util.yaml import dump as yaml_dump
 
-from .const import HELPER_STORAGE_KEYS, REDACTED, SECRET_KEY_RE, SECTIONS
+from .const import DEFAULT_SECTIONS, HELPER_STORAGE_KEYS, REDACTED, SECRET_KEY_RE
 
 _LOGGER = logging.getLogger(__name__)
 NO_AREA = "(ohne Bereich)"
@@ -60,6 +62,23 @@ def yaml_block(data: Any) -> str:
     return "```yaml\n" + yaml_dump(redact(data)).rstrip() + "\n```\n"
 
 
+def device_entry_ids(dev: Any) -> set[str]:
+    """Config entry ids of a device.
+
+    HA >= 2026.11 stores a single ``config_entry_id``; the old
+    ``config_entries`` property became a deprecated shim that reports usage
+    (stack inspection: slow, logs warnings), so avoid it when possible.
+    """
+    try:
+        has_single = "config_entry_id" in attr.fields_dict(type(dev))
+    except (TypeError, attr.exceptions.NotAnAttrsClassError):
+        has_single = hasattr(dev, "config_entry_id")
+    if has_single:
+        cid = dev.config_entry_id
+        return {cid} if cid else set()
+    return set(getattr(dev, "config_entries", ()) or ())
+
+
 def _read_storage(path: Path) -> Any:
     if not path.is_file():
         return None
@@ -70,12 +89,13 @@ def _read_storage(path: Path) -> Any:
 # ------------------------------------------------------------ main entry
 async def async_build_markdown(hass: HomeAssistant, opts: dict[str, Any]) -> dict[str, Any]:
     """Return {'markdown': str, ...} for the requested sections."""
-    sections = opts.get("sections") or SECTIONS
+    sections = opts.get("sections") or DEFAULT_SECTIONS
     full = opts.get("detail", "summary") == "full"
     f_area = opts.get("filter_area")
     f_domain = opts.get("filter_domain")
     f_integ = opts.get("filter_integration")
     with_states = opts.get("include_states", False)
+    with_disabled = opts.get("include_disabled", False)
 
     areg, dreg, ereg = ar.async_get(hass), dr.async_get(hass), er.async_get(hass)
     freg, lreg = fr.async_get(hass), lr.async_get(hass)
@@ -94,13 +114,17 @@ async def async_build_markdown(hass: HomeAssistant, opts: dict[str, Any]) -> dic
         return [label_name.get(i, i) for i in ids]
 
     def dev_ok(dev: dr.DeviceEntry) -> bool:
+        if not with_disabled and dev.disabled_by:
+            return False
         if f_area and dev.area_id != f_area:
             return False
-        if f_integ and f_integ not in {entry_domain.get(c) for c in dev.config_entries}:
+        if f_integ and f_integ not in {entry_domain.get(c) for c in device_entry_ids(dev)}:
             return False
         return True
 
     def ent_ok(ent: er.RegistryEntry) -> bool:
+        if not with_disabled and ent.disabled_by:
+            return False
         if f_domain and ent.domain != f_domain:
             return False
         if f_area and ent_area(ent) != f_area:
@@ -129,6 +153,11 @@ async def async_build_markdown(hass: HomeAssistant, opts: dict[str, Any]) -> dic
             ["Entitäten (Registry)", len(ereg.entities)],
             ["Zustände", len(hass.states.async_all())],
         ]))
+        md.append(
+            "\n_devices/entities sind groß: nur auf Anfrage (sections) und am besten "
+            "mit filter_area/filter_domain/filter_integration; deaktivierte nur mit "
+            "include_disabled._\n"
+        )
 
     # -------- floors
     if "floors" in sections:
@@ -160,7 +189,7 @@ async def async_build_markdown(hass: HomeAssistant, opts: dict[str, Any]) -> dic
         dev_cnt: dict[str, int] = defaultdict(int)
         ent_cnt: dict[str, int] = defaultdict(int)
         for d in dreg.devices.values():
-            for c in d.config_entries:
+            for c in device_entry_ids(d):
                 dev_cnt[c] += 1
         for e in ereg.entities.values():
             if e.config_entry_id:
@@ -181,7 +210,7 @@ async def async_build_markdown(hass: HomeAssistant, opts: dict[str, Any]) -> dic
                 continue
             grouped[area_name.get(d.area_id, NO_AREA)].append([
                 d.name_by_user or d.name, d.manufacturer, d.model,
-                [entry_domain.get(c, c) for c in d.config_entries],
+                [entry_domain.get(c, c) for c in device_entry_ids(d)],
                 d.disabled_by, labels(d.labels), d.id,
             ])
         for area in sorted(grouped):

@@ -36,11 +36,12 @@ Settings → Devices & services → *Add integration* → **Config Export** (no 
 ```yaml
 action: config_export.markdown
 data:
-  sections: [areas, automations]   # optional, default: all
+  sections: [areas, automations]   # optional, default: all except devices/entities
   filter_area: living_room              # optional, area_id
   filter_domain: light             # optional
   filter_integration: zha          # optional
   include_states: true             # optional, default false
+  include_disabled: false          # optional, default false (devices/entities)
   detail: full                     # summary (default) | full
 response_variable: export
 ```
@@ -50,7 +51,8 @@ Response: `markdown`, `chars`, `ha_version`, `generated`, `sections`.
 The service only accepts calls from admin users and requires `return_response`.
 
 ## Notes
-- Large instances with `detail: full` produce large responses – request sections individually if your client limits message size.
+- `devices` and `entities` are only exported when requested in `sections` – on real instances they are large (example: ~1,500 devices / ~8,800 entities ≈ 1 MB of Markdown). Combine them with `filter_area`, `filter_domain` or `filter_integration`.
+- Disabled devices/entities are skipped unless `include_disabled: true`.
 - The default dashboard in auto-generated mode is reported as not readable (`ConfigNotFound`).
 
 ## License

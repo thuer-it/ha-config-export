@@ -37,6 +37,11 @@ markdown:
       default: false
       selector:
         boolean:
+    include_disabled:
+      required: false
+      default: false
+      selector:
+        boolean:
     detail:
       required: false
       default: summary

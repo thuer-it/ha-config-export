@@ -17,7 +17,7 @@
       "fields": {
         "sections": {
           "name": "Sections",
-          "description": "Sections to include (empty = all)."
+          "description": "Sections to include (empty = all except devices/entities)."
         },
         "filter_area": {
           "name": "Area",
@@ -38,6 +38,10 @@
         "detail": {
           "name": "Detail",
           "description": "summary or full (complete automation/script/helper/dashboard config)."
+        },
+        "include_disabled": {
+          "name": "Disabled",
+          "description": "Include disabled devices/entities."
         }
       }
     }

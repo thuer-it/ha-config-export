@@ -24,6 +24,7 @@ SERVICE_SCHEMA = vol.Schema(
         vol.Optional("filter_domain"): cv.string,
         vol.Optional("filter_integration"): cv.string,
         vol.Optional("include_states", default=False): cv.boolean,
+        vol.Optional("include_disabled", default=False): cv.boolean,
         vol.Optional("detail", default="summary"): vol.In(["summary", "full"]),
     }
 )

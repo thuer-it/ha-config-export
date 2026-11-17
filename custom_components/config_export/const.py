@@ -19,6 +19,10 @@ SECTIONS = [
     "dashboards",
 ]
 
+# Default when no sections are given: devices/entities are large on real
+# instances (thousands of rows) and must be requested explicitly.
+DEFAULT_SECTIONS = [s for s in SECTIONS if s not in ("devices", "entities")]
+
 # Storage-based helper collections, read read-only from .storage/<key>
 HELPER_STORAGE_KEYS = [
     "input_boolean",
